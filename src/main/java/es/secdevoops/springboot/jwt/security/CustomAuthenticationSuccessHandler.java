@@ -23,9 +23,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    @Value("${spring.security.jwt.expiration-time}")
-    private final Long expirationTime;
-
     private final UserService userService;
 
     private final JwtService jwtService;
@@ -51,7 +48,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         Cookie jwtCookie = new Cookie("secdevoops-token", token);
         jwtCookie.setHttpOnly(true); // Protege la cookie contra ataques de scripting en el lado del cliente
         //jwtCookie.setSecure(true); // Asegura que la cookie solo se envíe a través de HTTPS
-        jwtCookie.setMaxAge(Long.valueOf(expirationTime/1000).intValue()); // Configura la cookie para que expire después del tiempo preestablecido (en segs)
+        jwtCookie.setMaxAge(Long.valueOf(jwtService.getExpirationTime()/1000).intValue()); // Configura la cookie para que expire después del tiempo preestablecido (en segs)
         jwtCookie.setPath("/"); // Permite que la cookie sea accesible en todo el sitio
 
         //Añadimos el jwt token tanto en la cabecera Authorization como en una cookie segura, para que se pueda usar según se necesite

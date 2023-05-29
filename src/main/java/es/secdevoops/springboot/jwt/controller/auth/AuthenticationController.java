@@ -6,6 +6,8 @@ import es.secdevoops.springboot.jwt.dto.AuthenticationResponse;
 import es.secdevoops.springboot.jwt.service.auth.AuthenticationService;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -19,14 +21,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/secdevoops/auth")
-@RequiredArgsConstructor
 public class AuthenticationController {
-    private final AuthenticationService service;
+
+    @Autowired
+    @Value("${spring.security.jwt.expiration-time}")
+    private final Long expirationTime;
+    private final AuthenticationService authenticationService;
+
+    @Autowired
+    public AuthenticationController(@Value("${spring.security.jwt.expiration-time}") Long expirationTime,
+            AuthenticationService authenticationService) {
+        this.expirationTime = expirationTime;
+        this.authenticationService = authenticationService;
+    }
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
         try {
-            String token = service.authenticate(request);
+            String token = authenticationService.authenticate(request);
 
             HttpHeaders headers = new HttpHeaders();
             //Añadimos el jwt token tanto en la cabecera Authorization como en una cookie segura, para que se pueda usar según se necesite
@@ -35,7 +47,7 @@ public class AuthenticationController {
                     ResponseCookie.from("secdevoops-token", token)
                             .httpOnly(true) // Protege la cookie contra ataques de scripting en el lado del cliente
                             //.secure(true) // Asegura que la cookie solo se envíe a través de HTTPS
-                            .maxAge(7 * 24 * 60 * 60) // Configura la cookie para que expire después de 7 días
+                            .maxAge(expirationTime/1000) // Configura la cookie para que expire según lo establecido (en segs)
                             .path("/") // Permite que la cookie sea accesible en todo el sitio
                             .build()
                             .toString());

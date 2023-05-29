@@ -100,4 +100,8 @@ private Map<String, String> validTokenMap =  new HashMap<>();
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    public long getExpirationTime() {
+        return this.expirationTime;
+    }
 }
