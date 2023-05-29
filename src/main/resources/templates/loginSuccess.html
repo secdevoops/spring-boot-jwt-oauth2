@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http:/www.thymeleaf.org">
+<head th:replace="~{fragments :: html_head(pageTitle='Init')}" />
+<body>
+<div class="container text-center">
+</div>
+<script>
+window.onload = function () {
+    var bearer = localStorage.getItem('Bearer');
+    if (bearer) {
+        fetch('http://localhost:8080/secdevoops/hello', {
+            headers: {
+                'Authorization': 'Bearer ' + bearer
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // Si la respuesta es exitosa, maneja la respuesta (por ejemplo, mostrando contenido en la página)
+                response.text().then(content => {
+                    document.body.innerHTML = content;
+                });
+            } else {
+                // Si la respuesta no es exitosa, maneja el error (por ejemplo, mostrando un mensaje)
+                console.error('Error: ' + response.status);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+};
+</script>
+</body>
+</html>

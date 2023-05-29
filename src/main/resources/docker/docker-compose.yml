@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    #restart: always
+    environment:
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+      MYSQL_ROOT_PASSWORD: myrootpassword
+    volumes:
+      #- db-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping --silent" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: secdevoops/spring-boot-jwt:0.0.1-SNAPSHOT
+    environment:
+      - DB_URL_APP=jdbc:mysql://db:3306/mydatabase
+      - DB_USERNAME_APP=myuser
+      - DB_PASSWORD_APP=mypassword
+      - JWT_SECRET=CHANGE_WITH_YOUR_JWT_SECRET
+      - GOOGLE_OAUTH_CLIENT_ID=CHANGE_WITH_YOUR_GOOLGE_OAUTH_CLIENT_ID
+      - GOOGLE_OAUTH_CLIENT_SECRET=CHANGE_WITH_YOUR_GOOGLE_OAUTH_CLIENT_SECRET
+    expose:
+      - 8080
+      - 8000
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+#volumes:
+  #db-data:

@@ -1,0 +1,73 @@
+server:
+  port: 8080  # Puerto en el que se va a ejecutar la aplicación
+
+spring:
+  datasource:
+    url: ${DB_URL_APP} # URL de la base de datos a la que se va a conectar
+    username: ${DB_USERNAME_APP} # Usuario de la base de datos
+    password: ${DB_PASSWORD_APP} # Contraseña de la base de datos
+
+
+
+  # Propiedades JPA
+  jpa:
+    show-sql: true # Muestra las consultas SQL generadas por JPA
+    hibernate:
+      ddl-auto: update # Actualiza automáticamente el esquema de la base de datos
+      testOnBorrow: true # Verifica si la conexión está disponible en el pool de conexiones antes de obtenerla
+      testWhileIdle: true # Verifica si la conexión está disponible en el pool de conexiones mientras está inactiva
+      timeBetweenEvictionRunsMillis: 60000 # Tiempo en milisegundos que transcurre entre cada proceso de verificación de conexiones inactivas
+      minEvictableIdleTimeMillis: 30000 # Tiempo en milisegundos que una conexión puede estar inactiva antes de ser eliminada del pool de conexiones
+      validationQuery: SELECT 1 # Query de validación para comprobar que la conexión es válida
+      max-active: 15 # Número máximo de conexiones activas que puede haber en el pool de conexiones
+      max-idle: 10 # Número máximo de conexiones inactivas que puede haber en el pool de conexiones
+      max-wait: 8000 # Tiempo máximo en milisegundos que se espera para obtener una conexión disponible en el pool de conexiones
+
+  security:
+    jwt:
+      secret: ${JWT_SECRET} # Clave secreta para la generación de tokens JWT
+      expiration-time: 86400000 # Tiempo en milisegundos que dura la validez del token JWT (24 horas)
+      token-prefix: Bearer # Prefijo del token JWT
+      header-string: Authorization # Nombre del encabezado HTTP que contiene el token JWT
+      enabled: true # Activa el uso de tokens JWT para la seguridad
+      issuer: https://www.secdevoops.es # Emisor del token JWT
+    oauth2:
+      resourceserver:
+        jwt:
+          secret: ${JWT_SECRET} # Clave secreta para la generación de tokens JWT
+          expiration-time: 86400000 # Tiempo en milisegundos que dura la validez del token JWT (24 horas)
+          token-prefix: Bearer # Prefijo del token JWT
+          header-string: Authorization # Nombre del encabezado HTTP que contiene el token JWT
+          enabled: true # Activa el uso de tokens JWT para la seguridad
+          issuer: https://www.secdevoops.es # Emisor del token JWT
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+            scope: profile, email
+          #facebook:
+            #client-id: ${FACEBOOK_OAUTH_CLIENT_ID}
+            #client-secret: ${FACEBOOK_OAUTH_CLIENT_SECRET}
+            #scope: profile, email
+          #github:
+            #client-id: ${GITHUB_OAUTH_CLIENT_ID}
+            #client-secret: ${GITHUB_OAUTH_CLIENT_SECRET}
+            #scope: profile, email
+
+springdoc:
+  api-docs:
+    enabled: true # Activa la generación de la documentación de la API
+    title: Mi documentación de API # Título de la documentación de la API
+    description: Descripción de mi API # Descripción de la documentación de la API
+  swagger-ui:
+    enabled: true # Activa la interfaz de usuario de Swagger para la documentación de la API
+
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG # Nivel de log para el paquete security de Spring
+      hibernate:
+        SQL: DEBUG # Nivel de log para las consultas SQL generadas por Hibernate

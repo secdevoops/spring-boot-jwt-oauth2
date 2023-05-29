@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http:/www.thymeleaf.org">
+<head th:replace="~{fragments :: html_head(pageTitle='Login')}" />
+<body>
+<div class="container text-center">
+    <div>
+        <h2>Please Login</h2>
+        <br/>
+    </div>
+    <div>
+        <h4><a th:href="@{/oauth2/authorize/google}" class="btn btn-primary">Login with Google</a></h4>
+    </div>
+    <div><p>OR</p></div>
+
+    <form id="loginForm" style="max-width: 400px; margin: 0 auto;">
+        <div class="border border-secondary rounded p-3">
+            <div th:if="${param.error}">
+                <p class="text-danger">Invalid username or password.</p>
+            </div>
+            <div th:if="${param.logout}">
+                <p class="text-warning">You have been logged out.</p>
+            </div>
+            <div>
+                <p><input type="email" id="email" required class="form-control" placeholder="E-mail" /></p>
+            </div>
+            <div>
+                <p><input type="password" id="password" required class="form-control" placeholder="Password" /></p>
+            </div>
+            <div>
+                <p><input type="submit" value="Login" class="btn btn-primary" /></p>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+
+function goToHello() {
+    var bearer = localStorage.getItem('Bearer');
+
+    if(bearer){
+        fetch('http://localhost:8080/secdevoops/hello', {
+                headers: {
+                    'Authorization': 'Bearer ' + bearer
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Si la respuesta es correcta, hacemos la redirección
+                    window.location.href = 'http://localhost:8080/secdevoops/hello';
+                } else {
+                    // Si no estamos autorizados, borramos el bearer del localstorage
+                    localStorage.removeItem('Bearer');
+                }
+            })
+        .catch(error => console.error('Error:', error));
+    }
+}
+window.onload = goToHello();
+
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/secdevoops/auth/authenticate', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var bearer = xhr.getResponseHeader('Authorization');
+            if (bearer.startsWith('Bearer ')) {
+                bearer = bearer.slice(7, bearer.length);
+            }
+            localStorage.setItem('Bearer', bearer);
+            goToHello();
+        }
+    };
+    xhr.send(
+        JSON.stringify({
+            email: email,
+            password: password
+        }));
+});
+</script>
+</body>
+</html>
